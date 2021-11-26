@@ -68,7 +68,8 @@ async function run(){
         });
         // GET API for reviews
         app.get('/reviews', async(req, res) => {
-            const cursor = reviewCollection.find({});
+            const query = {reviewStatus : 'Published'}
+            const cursor = reviewCollection.find(query);
             const reviews = await cursor.toArray();
             res.send(reviews);
         });
@@ -154,6 +155,31 @@ async function run(){
             const result = await ordersCollection.updateOne(filter,updateDoc,options);
             res.send(result);
         });
+        //UPDATE api for review status
+        app.put('/reviews/pending/:id', async(req, res) => {
+            const id = req.params.id;
+            const filter = {_id : ObjectId(id)};
+            const options = { upsert : true};
+            const updateDoc = {
+                $set: {
+                    reviewStatus : 'Pending'
+                },
+            };
+            const result = await reviewCollection.updateOne(filter,updateDoc,options);
+            res.send(result);
+        });
+        app.put('/reviews/publish/:id', async(req, res) => {
+            const id = req.params.id;
+            const filter = {_id : ObjectId(id)};
+            const options = { upsert : true};
+            const updateDoc = {
+                $set: {
+                    reviewStatus : 'Published'
+                },
+            };
+            const result = await reviewCollection.updateOne(filter,updateDoc,options);
+            res.send(result);
+        });
         //Udate api for making admin
         app.put('/users/admin', verifyToken, async(req, res) => {
             const user = req.body;
@@ -184,6 +210,13 @@ async function run(){
             const id = req.params.id;
             const query = {_id : ObjectId(id)};
             const result = await ordersCollection.deleteOne(query);
+            res.send(result);
+        });
+        //DELETE api for order
+        app.delete('/reviews/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id : ObjectId(id)};
+            const result = await reviewCollection.deleteOne(query);
             res.send(result);
         });
 
