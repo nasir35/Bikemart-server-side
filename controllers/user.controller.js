@@ -4,6 +4,7 @@ const {
   findUserByToken,
   findAllUsersService,
   documentsCount,
+  deleteUserService,
 } = require("../services/user.service");
 const { sendMailWithGmail } = require("../utils/email");
 const { generateToken } = require("../utils/token");
@@ -52,7 +53,7 @@ exports.signup = async (req, res) => {
     console.log(error);
     res.status(500).json({
       status: "fail",
-      error,
+      error: Object.keys(error).length ? error : error?.message,
     });
   }
 };
@@ -73,7 +74,7 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(401).json({
+      return res.status(400).json({
         status: "fail",
         error: "Please provide your credentials",
       });
@@ -82,7 +83,7 @@ exports.login = async (req, res) => {
     const user = await findUserByEmail(email);
 
     if (!user) {
-      return res.status(401).json({
+      return res.status(404).json({
         status: "fail",
         error: "No user found. Please create an account",
       });
@@ -98,7 +99,7 @@ exports.login = async (req, res) => {
     }
 
     if (user.status != "active") {
-      return res.status(401).json({
+      return res.status(403).json({
         status: "fail",
         error: "Your account is not active yet.",
       });
@@ -124,6 +125,31 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.getTokenExpiry = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const user = await findUserByEmail(email);
+
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    const expiryTime = user.confirmationTokenExpires || 0;
+    res.status(200).json({
+      status: "success",
+      expiryTime,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "fail",
+      message: error.message,
+    });
+  }
+};
+
 exports.getMe = async (req, res) => {
   try {
     const user = await findUserByEmail(req.user?.email);
@@ -136,6 +162,39 @@ exports.getMe = async (req, res) => {
     res.status(500).json({
       status: "fail",
       error,
+    });
+  }
+};
+exports.getUserByEmail = async (req, res) => {
+  try {
+    const email = req.params.email;
+    const user = await findUserByEmail(email);
+
+    res.status(200).json({
+      status: "success",
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "fail",
+      error: Object.keys(error).length ? error : error?.message,
+    });
+  }
+};
+exports.deleteUser = async (req, res) => {
+  try {
+    const email = req.params.email;
+    const user = await deleteUserService(email);
+
+    res.status(200).json({
+      status: "success",
+      data: user,
+      message: "User deleted successfully!",
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "fail",
+      error: Object.keys(error).length ? error : error?.message,
     });
   }
 };
@@ -177,6 +236,69 @@ exports.confirmEmail = async (req, res) => {
     res.status(500).json({
       status: "fail",
       error,
+    });
+  }
+};
+
+exports.resendVerificationLink = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const user = await findUserByEmail(email);
+
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    if (user.status === "active") {
+      return res.status(400).json({
+        status: "fail",
+        message: "Account is already activated",
+      });
+    }
+
+    const now = Date.now();
+    const lastTokenSent = user.confirmationTokenCreated || 0;
+    const tokenRequestLimit = user.confirmationRequestCount || 0;
+
+    if (tokenRequestLimit >= 2 && now - lastTokenSent < 24 * 60 * 60 * 1000) {
+      return res.status(429).json({
+        status: "fail",
+        message:
+          "You have reached the maximum number of resend attempts for today",
+      });
+    }
+
+    if (now - lastTokenSent < 10 * 60 * 1000) {
+      return res.status(429).json({
+        status: "fail",
+        message: "You can only request a new token every 10 minutes",
+      });
+    }
+
+    const token = user.generateConfirmationToken();
+
+    await user.save({ validateBeforeSave: false });
+
+    const mailData = {
+      to: [user.email],
+      name: [user.name],
+      subject: "Verify your Account",
+      link: `${req.protocol}://${req.get("host")}/confirmation/${token}`,
+    };
+
+    await sendMailWithGmail(mailData);
+
+    res.status(200).json({
+      status: "success",
+      message: "Verification link resent",
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "fail",
+      message: error.message,
     });
   }
 };

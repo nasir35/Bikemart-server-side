@@ -85,7 +85,9 @@ const userSchema = mongoose.Schema(
       enum: ["active", "inactive", "blocked"],
     },
     confirmationToken: String,
+    confirmationTokenCreated: Date,
     confirmationTokenExpires: Date,
+    confirmationTokenRequestCount: { type: Number, default: 0 },
 
     passwordChangedAt: Date,
     passwordResetToken: String,
@@ -122,8 +124,14 @@ userSchema.methods.generateConfirmationToken = function () {
   this.confirmationToken = token;
 
   const date = new Date();
-
-  date.setDate(date.getDate() + 1);
+  this.confirmationTokenCreated = date;
+  if (this.confirmationTokenRequestCount < 3) {
+    date.setDate(date.getMinutes() + 10);
+    this.confirmationTokenRequestCount++;
+  } else {
+    date.setDate(date.getDate() + 1);
+    this.confirmationTokenRequestCount = 0;
+  }
   this.confirmationTokenExpires = date;
 
   return token;

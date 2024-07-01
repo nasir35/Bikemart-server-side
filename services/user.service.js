@@ -19,9 +19,36 @@ exports.signupService = async (userInfo) => {
 };
 
 exports.findUserByEmail = async (email) => {
-  return await User.findOne({ email });
+  try {
+    const result = await User.findOne({ email }).exec();
+    if (!result) {
+      throw new Error("No User found with the specified email.");
+    }
+    return result;
+  } catch (error) {
+    throw error;
+  }
 };
 
 exports.findUserByToken = async (token) => {
-  return await User.findOne({ confirmationToken: token });
+  try {
+    const result = await User.findOne({ confirmationToken: token }).exec();
+    if (!result) {
+      throw new Error("No User found with the specified Token.");
+    }
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+exports.deleteUserService = async (email) => {
+  try {
+    const result = await User.findOneAndDelete({ email }).exec();
+    if (!result) {
+      throw new Error("No User found with the specified email.");
+    }
+    return result;
+  } catch (error) {
+    throw error;
+  }
 };
