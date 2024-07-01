@@ -126,7 +126,7 @@ userSchema.methods.generateConfirmationToken = function () {
   const date = new Date();
   this.confirmationTokenCreated = date;
   if (this.confirmationTokenRequestCount < 3) {
-    date.setDate(date.getMinutes() + 10);
+    date.setMinutes(date.getMinutes() + 10 * 60 * 1000);
     this.confirmationTokenRequestCount++;
   } else {
     date.setDate(date.getDate() + 1);
