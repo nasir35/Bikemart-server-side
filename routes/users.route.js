@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/", userController.getAllUsers);
 router.post("/signup", userController.signup);
-router.get("/signup/confirmation/:token", userController.confirmEmail);
+router.get("/signup/verify/:token", userController.confirmEmail);
 router.get(
   "/signup/resend-verification/:email",
   userController.resendVerificationLink
@@ -17,8 +17,8 @@ router.post("/login", userController.login);
 
 router.get("/me", verifyToken, userController.getMe);
 router
-  .route("/:email")
-  .get(userController.getUserByEmail)
+  .route("/delete")
   .delete(verifyToken, authorization("admin"), userController.deleteUser);
+router.route("/:email").get(userController.getUserByEmail);
 
 module.exports = router;

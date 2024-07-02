@@ -38,9 +38,7 @@ exports.signup = async (req, res) => {
       to: [user.email],
       name: [user.name],
       subject: "Verify your Account",
-      link: `${req.protocol}://${req.get("host")}${
-        req.originalUrl
-      }/confirmation/${token}`,
+      link: `http://localhost:5173/verify/${token}`,
     };
 
     await sendMailWithGmail(mailData);
@@ -183,8 +181,8 @@ exports.getUserByEmail = async (req, res) => {
 };
 exports.deleteUser = async (req, res) => {
   try {
-    const email = req.params.email;
-    const user = await deleteUserService(email);
+    const query = req.query;
+    const user = await deleteUserService(query);
 
     res.status(200).json({
       status: "success",
@@ -209,6 +207,7 @@ exports.confirmEmail = async (req, res) => {
       return res.status(403).json({
         status: "fail",
         error: "Invalid token",
+        email: user.email,
       });
     }
 
@@ -218,6 +217,7 @@ exports.confirmEmail = async (req, res) => {
       return res.status(401).json({
         status: "fail",
         error: "Token expired",
+        email: user.email,
       });
     }
 
@@ -229,14 +229,21 @@ exports.confirmEmail = async (req, res) => {
 
     res.status(200).json({
       status: "success",
-      message: "Successfully activated your account.",
+      message: "Verification success.",
+      email: user.email,
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      status: "fail",
-      error,
-    });
+    if (error.message === "No User found with the specified Token.") {
+      res.status(404).json({
+        status: "fail",
+        error: error.message,
+      });
+    } else {
+      res.status(500).json({
+        status: "fail",
+        error,
+      });
+    }
   }
 };
 
@@ -253,17 +260,18 @@ exports.resendVerificationLink = async (req, res) => {
     }
 
     if (user.status === "active") {
+      console.log(user.status);
       return res.status(400).json({
         status: "fail",
         message: "Account is already activated",
       });
     }
 
-    const now = Date.now();
-    const lastTokenSent = user.confirmationTokenCreated || 0;
+    const now = new Date(Date.now());
+    const lastTokenSent = user.confirmationTokenCreated || new Date(Date.now());
     const tokenRequestLimit = user.confirmationRequestCount || 0;
 
-    if (tokenRequestLimit >= 2 && now - lastTokenSent < 24 * 60 * 60 * 1000) {
+    if (tokenRequestLimit >= 0 && now - lastTokenSent < 24 * 60 * 60 * 1000) {
       return res.status(429).json({
         status: "fail",
         message:
@@ -286,9 +294,9 @@ exports.resendVerificationLink = async (req, res) => {
       to: [user.email],
       name: [user.name],
       subject: "Verify your Account",
-      link: `${req.protocol}://${req.get("host")}/confirmation/${token}`,
+      link: `http://localhost:5173/verify/${token}`,
     };
-
+    // link: `${req.protocol}://${req.get("host")}/verify/${token}`,
     await sendMailWithGmail(mailData);
 
     res.status(200).json({

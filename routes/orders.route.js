@@ -8,7 +8,7 @@ router
   .route("/")
   .get(verifyToken, authorization("admin"), orderController.getAllOrders)
   .post(verifyToken, orderController.saveOrder);
-router.route("/myorder").get(verifyToken, orderController.getMyOrders);
+router.route("/myorders").get(verifyToken, orderController.getMyOrders);
 router.route("/myorder/:id").patch(verifyToken, orderController.updateMyOrder);
 
 router

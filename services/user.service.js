@@ -41,11 +41,11 @@ exports.findUserByToken = async (token) => {
     throw error;
   }
 };
-exports.deleteUserService = async (email) => {
+exports.deleteUserService = async (query) => {
   try {
-    const result = await User.findOneAndDelete({ email }).exec();
+    const result = await User.findOneAndDelete(query).exec();
     if (!result) {
-      throw new Error("No User found with the specified email.");
+      throw new Error("No User found with the specified query.");
     }
     return result;
   } catch (error) {

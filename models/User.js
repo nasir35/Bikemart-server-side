@@ -124,15 +124,15 @@ userSchema.methods.generateConfirmationToken = function () {
   this.confirmationToken = token;
 
   const date = new Date();
-  this.confirmationTokenCreated = date;
+  const currentDate = Date.now();
+  this.confirmationTokenCreated = currentDate;
   if (this.confirmationTokenRequestCount < 3) {
-    date.setMinutes(date.getMinutes() + 10 * 60 * 1000);
+    this.confirmationTokenExpires = Date.now() + 10 * 60 * 1000;
     this.confirmationTokenRequestCount++;
   } else {
-    date.setDate(date.getDate() + 1);
     this.confirmationTokenRequestCount = 0;
+    this.confirmationTokenExpires = Date.now() + 24 * 60 * 60 * 1000;
   }
-  this.confirmationTokenExpires = date;
 
   return token;
 };
