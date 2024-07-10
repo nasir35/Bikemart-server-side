@@ -19,15 +19,17 @@ const emailTemplate = (recieptName, verificationLink) => `
         padding: 20px;
         border: 1px solid #dddddd;
       }
-      .header {
+      .email-container .header {
         text-align: center;
         background-color: #ffa755;
         color: white;
-        padding: 10px 0;
+        padding: 10px;
         border-radius: 6px;
       }
       .logo-container {
         display: flex;
+        max-width : fit-content;
+        margin : 0 auto;
         justify-content: center;
         align-items: center;
         gap: 5px;
@@ -101,7 +103,7 @@ const emailTemplate = (recieptName, verificationLink) => `
         </p>
         <a href=${verificationLink}>${verificationLink}</a>
         <p class="warning-message">
-          The Token will expire after 30mins. Please confirm within time or
+          The Token will expire after 10 minutes. Please confirm within time or
           request again if expired!
         </p>
         <p>Thank you for being with us!</p>

@@ -19,6 +19,9 @@ router.get("/me", verifyToken, userController.getMe);
 router
   .route("/delete")
   .delete(verifyToken, authorization("admin"), userController.deleteUser);
-router.route("/:email").get(userController.getUserByEmail);
+router
+  .route("/:email")
+  .get(verifyToken, userController.getUserByEmail)
+  .patch(verifyToken, authorization("admin"), userController.updateUser);
 
 module.exports = router;

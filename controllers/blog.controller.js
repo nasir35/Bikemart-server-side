@@ -4,6 +4,7 @@ const {
   saveBlogService,
   modifyBlogService,
   deleteBlogService,
+  findBlogService,
 } = require("../services/blog.service");
 
 exports.getAllBlogs = async (req, res) => {
@@ -19,6 +20,24 @@ exports.getAllBlogs = async (req, res) => {
     res.status(500).json({
       status: "fail",
       error,
+    });
+  }
+};
+exports.getBlog = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const blog = await findBlogService(id);
+
+    res.status(200).json({
+      status: "success",
+      data: blog,
+      message: "Blog fetched successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "fail",
+      error,
+      message: "Blog fetching failed!",
     });
   }
 };

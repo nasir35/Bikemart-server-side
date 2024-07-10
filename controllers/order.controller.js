@@ -63,6 +63,7 @@ exports.updateOrder = async (req, res, next) => {
   try {
     const id = req.params.id;
     const update = req.body;
+    console.log(update);
     let status = req.body.status;
     // allowed status transitions
     const allowedTransitions = {
@@ -131,7 +132,7 @@ exports.getMyOrders = async (req, res) => {
   try {
     const orders = await findMyOrderService(req.user.email);
     const totalCount = await AllOrderCountService({
-      "buyer.userEmail": req.user.email,
+      "buyer.email": req.user.email,
     });
     res.status(200).json({
       status: "success",
@@ -153,14 +154,14 @@ exports.updateMyOrder = async (req, res) => {
     const allowedTransitions = {
       "Out for Delivery": ["Delivered"],
       Processing: ["Request Cancel"],
-      "Request Cancel": ["Processing"],
+      "Request Cancel": ["Request Cancel", "Processing"],
     };
     const selectedOrder = await checkStatusTransition(
       id,
       status,
       allowedTransitions
     );
-    if (selectedOrder.buyer.userEmail !== req.user.email) {
+    if (selectedOrder.buyer.email !== req.user.email) {
       return res.status(403).json({
         status: "fail",
         message: "Error! You are not authorized!",

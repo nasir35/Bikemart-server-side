@@ -3,6 +3,20 @@ const validator = require("validator");
 
 const blogSchema = mongoose.Schema(
   {
+    author: {
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+      name: {
+        type: String,
+        required: [true, "Please provide a name."],
+        trim: true,
+        minLength: [2, "Name must be at least 2 characters."],
+        maxLength: [50, "Name is too large"],
+      },
+    },
     title: {
       type: String,
       required: [true, "Please provide a title."],

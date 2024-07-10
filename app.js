@@ -12,6 +12,7 @@ const productRoutes = require("./routes/products.route");
 const reviewRoutes = require("./routes/reviews.route");
 const blogRoutes = require("./routes/blogs.route");
 const orderRoutes = require("./routes/orders.route");
+const newsletterSubscriberRoutes = require("./routes/newsletterSubscriber.route");
 const errorHandler = require("./middleware/errorHandler");
 app.get("/", (req, res) => {
   res.send("Bikemart server is running.");
@@ -22,6 +23,7 @@ app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/reviews", reviewRoutes);
 app.use("/api/v1/blogs", blogRoutes);
 app.use("/api/v1/orders", orderRoutes);
+app.use("/api/v1/newsletter", newsletterSubscriberRoutes);
 
 app.all("*", (req, res) => {
   res.status(400).send("No route found.");

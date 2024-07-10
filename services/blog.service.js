@@ -42,3 +42,7 @@ exports.deleteBlogService = async (id) => {
   const result = await Blog.findOneAndDelete({ _id: id });
   return result;
 };
+exports.findBlogService = async (id) => {
+  const result = await Blog.findById(id);
+  return result;
+};

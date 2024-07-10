@@ -29,7 +29,20 @@ exports.findUserByEmail = async (email) => {
     throw error;
   }
 };
-
+exports.updateUserService = async (email, update) => {
+  try {
+    const result = await User.findOneAndUpdate({ email: email }, update, {
+      upsert: false,
+      new: true,
+    }).exec();
+    if (!result) {
+      throw new Error("No user found with the specified email.");
+    }
+    return result;
+  } catch (error) {
+    throw new Error("Failed to modify user.");
+  }
+};
 exports.findUserByToken = async (token) => {
   try {
     const result = await User.findOne({ confirmationToken: token }).exec();

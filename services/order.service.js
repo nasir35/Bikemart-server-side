@@ -55,7 +55,7 @@ exports.deleteOrderService = async (id) => {
 
 exports.findMyOrderService = async (email) => {
   try {
-    const result = await Order.find({ "buyer.userEmail": email }).exec();
+    const result = await Order.find({ "buyer.email": email }).exec();
     return result;
   } catch (error) {
     console.error(error);

@@ -10,6 +10,7 @@ router
   .post(verifyToken, authorization("admin"), blogController.saveBlog);
 router
   .route("/:id")
+  .get(blogController.getBlog)
   .patch(verifyToken, authorization("admin"), blogController.updateBlog)
   .delete(verifyToken, authorization("admin"), blogController.deleteBlog);
 

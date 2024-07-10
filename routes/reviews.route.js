@@ -7,7 +7,7 @@ const router = express.Router();
 router
   .route("/")
   .get(verifyToken, authorization("admin"), reviewController.getAllReviews)
-  .post(reviewController.saveReview);
+  .post(verifyToken, reviewController.saveReview);
 router.route("/published").get(reviewController.getPublishedReviews);
 router
   .route("/:id")
