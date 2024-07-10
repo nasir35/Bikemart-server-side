@@ -40,7 +40,7 @@ exports.signup = async (req, res) => {
         to: [user.email],
         name: [user.name],
         subject: "Verify your Account",
-        link: `${req.protocol}://${req.get("host")}/verify/${token}`,
+        link: `https://bikemart-client-side.vercel.app/verify/${token}`,
       };
 
       await sendMailWithGmail(mailData);
@@ -318,7 +318,7 @@ exports.resendVerificationLink = async (req, res) => {
       to: [user.email],
       name: [user.name],
       subject: "Verify your Account",
-      link: `${req.protocol}://${req.get("host")}/verify/${token}`,
+      link: `https://bikemart-client-side.vercel.app/verify/${token}`,
     };
 
     await sendMailWithGmail(mailData);
