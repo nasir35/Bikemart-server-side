@@ -1,10 +1,12 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const path = require("path");
 
 //middlewares
 app.use(express.json());
 app.use(cors());
+app.use(express.static(path.join(__dirname, "public")));
 
 //routes
 const usersRoute = require("./routes/users.route");

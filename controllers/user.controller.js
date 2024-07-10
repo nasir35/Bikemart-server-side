@@ -40,7 +40,7 @@ exports.signup = async (req, res) => {
         to: [user.email],
         name: [user.name],
         subject: "Verify your Account",
-        link: `http://localhost:5173/verify/${token}`,
+        link: `${req.protocol}://${req.get("host")}/verify/${token}`,
       };
 
       await sendMailWithGmail(mailData);
@@ -290,7 +290,8 @@ exports.resendVerificationLink = async (req, res) => {
     }
 
     const now = new Date(Date.now());
-    const lastTokenSent = user.confirmationTokenCreated || new Date(Date.now());
+    const lastTokenSent =
+      user.confirmationTokenCreated || new Date(Date.now()).getMinutes() + 10;
     const tokenRequestLimit = user.confirmationRequestCount || 0;
 
     if (tokenRequestLimit >= 2 && now - lastTokenSent < 24 * 60 * 60 * 1000) {
@@ -317,9 +318,9 @@ exports.resendVerificationLink = async (req, res) => {
       to: [user.email],
       name: [user.name],
       subject: "Verify your Account",
-      link: `http://localhost:5173/verify/${token}`,
+      link: `${req.protocol}://${req.get("host")}/verify/${token}`,
     };
-    // link: `${req.protocol}://${req.get("host")}/verify/${token}`,
+
     await sendMailWithGmail(mailData);
 
     res.status(200).json({
